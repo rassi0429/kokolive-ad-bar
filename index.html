@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+
+    <div id="image-container"></div>
+
+    <style>
+        html,
+        body {
+            height: 100%;
+            overflow: auto;
+        }
+
+        html::-webkit-scrollbar {
+            display: none;
+        }
+
+        body::-webkit-scrollbar {
+            display: none;
+        }
+
+
+        body {
+            margin: 0;
+            width: 100%;
+        }
+
+        #image-container {
+            display: flex;
+        }
+
+        .image-item {
+            height: 300px;
+            object-fit: contain;
+        }
+    </style>
+    <script type="module">
+        async function fetchAd() {
+            const data = await fetch("https://misskey.resonite.love/api/meta", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    "detail": false
+                })
+            })
+
+            const json = await data.json()
+            return json.ads.map(ad => ad.imageUrl)
+        }
+
+        const container = document.getElementById('image-container');
+
+        const ads = await fetchAd()
+        ads.forEach(url => {
+            const img = document.createElement('img');
+            img.src = url;
+            img.className = 'image-item';
+            container.appendChild(img);
+        });
+
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        const images = container.getElementsByTagName('img');
+        let totalWidth = 0;
+
+        for (const img of images) {
+            totalWidth += img.offsetWidth;
+        }
+        console.log(totalWidth);
+
+        container.style.width = `${totalWidth}px`;
+
+        // auto scroll
+        let scrollX = 0;
+        setInterval(() => {
+            scrollX += 1;
+            if (scrollX > totalWidth) {
+                scrollX = 0;
+                location.reload();
+            }
+            document.body.scrollTo(scrollX, 0);
+        }, 10);
+
+
+    </script>
+</body>
+
+</html>
